@@ -1,1 +1,13 @@
-
+{
+  "name": "asaas-facebook-integracao",
+  "version": "1.0.0",
+  "description": "Integração entre Asaas e BM CAPI",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.2",
+    "express": "^4.19.2"
+  }
+}
