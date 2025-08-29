@@ -18,24 +18,44 @@ app.post('/webhook', (req, res) => {
     }
 
     const notification = req.body;
-
+    
     if (notification.event === 'PAYMENT_RECEIVED' || notification.event === 'PAYMENT_CONFIRMED') {
-        console.log('Pagamento recebido/confirmado:', notification.payment.id);
-
+        
         const payment = notification.payment;
+        console.log(`Pagamento ${payment.id} recebido. Verificando descrição: "${payment.description}"`);
 
-        const userData = {
-            em: [hashValue(payment.customer.email.toLowerCase().trim())]
-        };
+        const PALAVRAS_CHAVE_PERMITIDAS = [
+            'raras 2026', 
+            'RARAS 2026', 
+            'RARAS'
+            'RARAS'
+        ];
 
-        const customData = {
-            value: payment.value,
-            currency: 'BRL',
-        };
+        const descricaoVenda = payment.description ? payment.description.toLowerCase() : '';
+        
+        const correspondeAUmEvento = PALAVRAS_CHAVE_PERMITIDAS.some(keyword => descricaoVenda.includes(keyword));
 
-        sendConversionToFacebook(userData, customData);
+        if (correspondeAUmEvento) {
+            
+            console.log(`Descrição corresponde a um evento da lista. Enviando para o Facebook.`);
+
+            const userData = {
+                em: [hashValue(payment.customer.email.toLowerCase().trim())]
+            };
+
+            const customData = {
+                value: payment.value,
+                currency: 'BRL',
+            };
+
+            sendConversionToFacebook(userData, customData);
+
+        } else {
+
+            console.log(`Descrição não corresponde a nenhum evento da lista. Venda ignorada.`);
+        }
     }
-
+    
     res.status(200).send('Evento recebido.');
 });
 
@@ -50,7 +70,7 @@ async function sendConversionToFacebook(userData, customData) {
     };
 
     const url = `https://graph.facebook.com/v19.0/${FACEBOOK_PIXEL_ID}/events?access_token=${FACEBOOK_ACCESS_TOKEN}`;
-
+    
     try {
         await axios.post(url, { data: [serverEvent] });
         console.log('Evento de "Purchase" enviado com sucesso para o Facebook!');
