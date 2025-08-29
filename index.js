@@ -29,7 +29,7 @@ app.post('/webhook', (req, res) => {
 
         const PALAVRAS_CHAVE_PERMITIDAS = [
             'raras 2026', 
-            'RARAS'
+            'RARAS',
             'RARAS 2026'
         ];
 
